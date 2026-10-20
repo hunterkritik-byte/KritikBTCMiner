@@ -1,52 +1,63 @@
 # KritikBTCMiner
 
-An open-source Rust project for learning and experimenting with Bitcoin proof-of-work.
+KritikBTCMiner is an experimental Rust Stratum V1 CPU mining client for Bitcoin-compatible SHA-256d pools.
 
-> **Status:** Early development. The current program is an educational SHA-256d proof-of-work demo, **not** a production Bitcoin miner and does not mine real Bitcoin or connect to a mining pool yet.
+It connects to a pool, subscribes and authorizes, parses jobs, constructs an 80-byte block header, hashes candidate headers with double SHA-256, compares hashes with the pool share target, and submits candidate shares.
 
-## Goals
+## Important limitations
 
-- Implement and test Bitcoin's double-SHA-256 primitive.
-- Build a safe, measurable proof-of-work demonstration.
-- Add proper Bitcoin block-header serialization and target validation.
-- Explore Stratum pool integration and ASIC work submission in later milestones.
+- This is an early experimental implementation, not audited or production-grade. Validate protocol byte order and share handling against a trusted pool before relying on it.
+- It is not expected to earn meaningful BTC on an Android phone. Bitcoin mining is dominated by specialized ASIC hardware.
+- It currently supports unencrypted Stratum V1 TCP only. TLS, reconnect/backoff, complete extranonce/job lifecycle handling, version rolling, time rolling, and robust multi-worker management remain to be implemented.
+- A pool share is not a Bitcoin block. Payouts depend on pool policy, accepted shares, fees, and payout thresholds.
+- Never put wallet seed phrases or private keys into this project. Never commit pool credentials.
 
-## Requirements
-
-- Rust toolchain (stable)
-- Cargo
-
-On Termux, install the tools with:
+## Termux setup
 
 ```sh
 pkg update
 pkg install rust git
+git clone https://github.com/hunterkritik-byte/KritikBTCMiner.git
+cd KritikBTCMiner
+cargo test
+cargo build --release
 ```
 
-## Run
+## Configure and run
+
+Use the host, port, username/worker and password supplied by a pool you trust. The hostname below is only a placeholder.
 
 ```sh
-cargo test
-cargo run -- "hello from KritikBTCMiner" 18
+export BTC_POOL_HOST="your-pool-host.example"
+export BTC_POOL_PORT="3333"
+export BTC_POOL_USER="your-pool-username.worker1"
+export BTC_POOL_PASSWORD="x"
+cargo run --release
 ```
 
-The second argument is the number of leading zero bits required in the demo hash (0–32). Higher values take longer on average. This demo searches a message-plus-nonce input; it is **not** a Bitcoin block header and a result is not valid for the Bitcoin network.
+Do not use these placeholder values as a real endpoint. Many pools use x as the worker password, but follow your provider's instructions. This implementation uses plain TCP; do not send credentials over untrusted networks.
 
-## Security notes
+## Current implementation
 
-- Never paste or store wallet seed phrases or private keys in this project.
-- Do not expect profitable Bitcoin mining on a phone CPU. Bitcoin mining generally requires specialized ASIC hardware.
-- No wallet access, seed phrase scanning, or fund transfers are part of this project.
+- Stratum V1 TCP connection
+- Subscribe and authorize requests
+- Pool difficulty and job notifications
+- Coinbase and merkle-root construction
+- 80-byte block header assembly
+- SHA-256d nonce search
+- Share-target comparison
+- Share submission and accepted/rejected response logging
+- Basic unit tests
 
-## Roadmap
+## Remaining production hardening
 
-- [x] Project scaffold and SHA-256d proof-of-work demo
-- [ ] Add benchmarks and clearer runtime statistics
-- [ ] Implement Bitcoin 80-byte block-header encoding and compact-target validation
-- [ ] Add test vectors for header hashing and target comparison
-- [ ] Research Stratum protocol and ASIC integration
-- [ ] Document hardware, power, and pool requirements
+- [ ] Validate header/merkle byte order with published vectors and a local Stratum test server
+- [ ] Add Stratum TLS and safe reconnect/backoff
+- [ ] Handle extranonce changes and job cancellation edge cases correctly
+- [ ] Add time rolling, version rolling, multi-worker support and accurate hashrate reporting
+- [ ] Add end-to-end pool integration tests
+- [ ] Benchmark on supported hardware; use ASICs for realistic Bitcoin mining
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See LICENSE.
