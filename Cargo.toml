@@ -1,0 +1,11 @@
+[package]
+name = "kritik-btc-miner"
+version = "0.1.0"
+edition = "2024"
+description = "Educational Rust experiments with Bitcoin SHA-256d proof-of-work"
+license = "MIT"
+repository = "https://github.com/hunterkritik-byte/KritikBTCMiner"
+readme = "README.md"
+
+[dependencies]
+sha2 = "0.10"
