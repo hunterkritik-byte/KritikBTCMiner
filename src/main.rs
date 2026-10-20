@@ -64,7 +64,7 @@ fn mine_job(job:Job,user:String,ex1:String,ex2_size:usize,target:[u8;32],socket:
             let header=match build_header(&job,&ex1,&ex2,nonce){Ok(h)=>h,Err(e)=>{eprintln!("Header error: {e}");break;}};
             let hash=sha256d(&header); count+=1;
             if hash_meets_target(&hash,&target){
-                let req=json!({"id":4,"method":"mining.submit","params":[user,job.id,encode_hex(&ex2),job.ntime,format!("{nonce:08x}")]});
+                let req=json!({"id":4,"method":"mining.submit","params":[user.clone(),job.id.clone(),encode_hex(&ex2),job.ntime.clone(),format!("{nonce:08x}")]});
                 if let Err(e)=send_json(&socket,&req){eprintln!("Submit failed: {e}");break;}
                 println!("Submitted candidate share for job {}",job.id);
             }
